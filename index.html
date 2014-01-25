@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+        <title>hello morse</title>
+    </head>
+    <body>
+        <h1>sup</h1>
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript">
+            var socket = io.connect('http://localhost');
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.start();
+
+            // Map over results of a webkit speechRecognition list to find
+            // result with highest confidence.
+            var mostConfidence = function(listResults) {
+                var highest = 0;
+                var result = undefined;
+                for (var i = 0; i < listResults.length; i++) {
+                    if (listResults[i][0].confidence > highest) {
+                        highest = listResults[i][0].confidence;
+                        result = listResults[i][0].transcript;
+                    }
+                }
+                return result;
+            };
+
+            recognition.onresult = function(event) {
+                console.log(mostConfidence(event.results));
+                send(mostConfidence(event.results));
+            };
+
+            // Send payload to morse board.
+            var send = function(str) {
+                socket.emit('newstring', JSON.stringify(str));
+            };
+
+        </script>
+
+    </body>
+</html>
