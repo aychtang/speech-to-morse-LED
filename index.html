@@ -7,13 +7,15 @@
         <h1>sup</h1>
         <script src="/socket.io/socket.io.js"></script>
         <script type="text/javascript">
+        
+            // Initialise services, socketIO & speech recognition API.
             var socket = io.connect('http://localhost');
             var recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.start();
 
-            // Map over results of a webkit speechRecognition list to find
+            // Reduce results of a webkit speechRecognition list to find
             // result with highest confidence.
             var mostConfidence = function(listResults) {
                 var highest = 0;
@@ -26,15 +28,16 @@
                 }
                 return result;
             };
-
-            recognition.onresult = function(event) {
-                console.log(mostConfidence(event.results));
-                send(mostConfidence(event.results));
-            };
-
+            
             // Send payload to morse board.
             var send = function(str) {
                 socket.emit('newstring', JSON.stringify(str));
+            };
+            
+            // In the event of results received, send the "best" one to
+            // the server.
+            recognition.onresult = function(event) {
+                send(mostConfidence(event.results));
             };
 
         </script>
